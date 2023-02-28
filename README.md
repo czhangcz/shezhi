@@ -1,2 +1,2 @@
 # shezhi
-Configuration files
+A collection of personal Linux configurations

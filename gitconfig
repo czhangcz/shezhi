@@ -1,0 +1,10 @@
+[alias]
+    los = log --pretty=format:'%C(yellow)%h %d %Cblue%cd %Cred%cn%Creset %s' --decorate --date=iso --abbrev-commit
+    lol = log --pretty=format:'%C(yellow)%h %C(green)%t %d %Cblue%cd %Cred%cn%Creset %s' --graph --decorate --date=iso --abbrev-commit
+    tree = log --pretty=format:'%C(yellow)%t %d %Cblue%cd %Cred%cn%Creset %s' --graph --decorate --date=iso --abbrev-commit --all
+[color]
+    status = auto
+    branch = auto
+    interactive = auto
+    diff = auto
+    ui = true	
