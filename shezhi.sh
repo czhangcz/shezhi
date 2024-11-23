@@ -18,14 +18,42 @@ fi
 
 SHEZHI_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
+SHELL_CHOICE="fish"  # Default shell choice
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --shell)
+            SHELL_CHOICE="$2"
+            shift 2
+            ;;
+        *)
+            shift
+            ;;
+    esac
+done
+
+if [[ "$SHELL_CHOICE" != "fish" && "$SHELL_CHOICE" != "zsh" ]]; then
+    echo "Invalid shell choice. Please use --shell with either 'fish' or 'zsh'"
+    exit 1
+fi
+
 function install_ubuntu_pkgs {
     sudo apt update
-    sudo apt-get install -y git direnv bash-completion tmux powerline curl fish neovim
+    sudo apt-get install -y git direnv bash-completion tmux powerline curl neovim
+    # Install shell of choice
+    if [ "$SHELL_CHOICE" = "fish" ]; then
+        sudo apt-get install -y fish
+    else
+        sudo apt-get install -y zsh
+    fi
     # Install pyenv dependencies
     sudo apt-get install -y make build-essential libssl-dev zlib1g-dev \
         libbz2-dev libreadline-dev libsqlite3-dev wget curl llvm \
         libncursesw5-dev xz-utils tk-dev libxml2-dev libxmlsec1-dev libffi-dev liblzma-dev
     # Install pyenv
+    if [ -d "$HOME/.pyenv" ]; then
+        echo "Existing pyenv installation found. Removing it..."
+        rm -rf "$HOME/.pyenv"
+    fi
     curl https://pyenv.run | bash
 }
 
@@ -33,7 +61,17 @@ function install_mac_pkgs {
     # Install Homebrew if not installed
     which brew || /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
     # Install packages
-    NONINTERACTIVE=1 brew install git direnv tmux curl fish pyenv starship neovim
+    if [ -d "$HOME/.pyenv" ]; then
+        echo "Existing pyenv installation found. Removing it..."
+        rm -rf "$HOME/.pyenv"
+    fi
+    NONINTERACTIVE=1 brew install git direnv tmux curl pyenv starship neovim
+    # Install shell of choice
+    if [ "$SHELL_CHOICE" = "fish" ]; then
+        NONINTERACTIVE=1 brew install fish
+    else
+        NONINTERACTIVE=1 brew install zsh
+    fi
 }
 
 function install_pkgs_in_common {
@@ -45,6 +83,7 @@ function install_pkgs_in_common {
         curl -sS https://starship.rs/install.sh | sh -s -- -y
     fi
 
+    mkdir -p ~/.tmux/plugins
     git clone --depth 1 --branch v3.1.0 https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
 }
 
@@ -65,30 +104,45 @@ function config {
     [[ -f $HOME/.bashrc ]] && mv $HOME/.bashrc $HOME/.bashrc.bak
     ln -sf $SHEZHI_DIR/bashrc $HOME/.bashrc
 
+    # set up shell of choice
+    if [ "$SHELL_CHOICE" = "fish" ]; then
+        # set up fish
+        mkdir -p $HOME/.config/fish
+        [[ -e $HOME/.config/fish/config.fish ]] && mv $HOME/.config/fish/config.fish $HOME/.config/fish/config.fish.bak
+        ln -sf $SHEZHI_DIR/config.fish $HOME/.config/fish/config.fish
+    else
+        # set up zsh
+        [[ -e $HOME/.zshrc ]] && mv $HOME/.zshrc $HOME/.zshrc.bak
+        ln -sf $SHEZHI_DIR/zshrc $HOME/.zshrc
+    fi
+    
+    # set chosen shell as default
+    if [ "$SHELL_CHOICE" = "fish" ]; then
+        if $_ismac; then
+            SHELL_PATH="/opt/homebrew/bin/fish"
+        else
+            SHELL_PATH="/usr/bin/fish"
+        fi
+    else
+        if $_ismac; then
+            SHELL_PATH="/opt/homebrew/bin/zsh"
+        else
+            SHELL_PATH="/usr/bin/zsh"
+        fi
+    fi
+    
+    if [ "$SHELL" != "$SHELL_PATH" ]; then
+        if ! grep -q "$SHELL_PATH" /etc/shells; then
+            echo "$SHELL_PATH" | sudo tee -a /etc/shells
+        fi
+        chsh -s "$SHELL_PATH"
+    fi
+
     # set up tmux
     [[ -e $HOME/.tmux.conf ]] && mv $HOME/.tmux.conf $HOME/.tmux.conf.bak
     ln -sf $SHEZHI_DIR/tmux.conf $HOME/.tmux.conf
     [[ -e $HOME/.tmux ]] && mv $HOME/.tmux $HOME/.tmux.bak
     ln -sf $SHEZHI_DIR/tmux $HOME/.tmux
-
-    # set up fish
-    mkdir -p $HOME/.config/fish
-    [[ -e $HOME/.config/fish/config.fish ]] && mv $HOME/.config/fish/config.fish $HOME/.config/fish/config.fish.bak
-    ln -sf $SHEZHI_DIR/config.fish $HOME/.config/fish/config.fish
-    
-    # set fish as default shell
-    if $_ismac; then
-        FISH_PATH="/opt/homebrew/bin/fish"
-    else
-        FISH_PATH="/usr/bin/fish"
-    fi
-    
-    if [ "$SHELL" != "$FISH_PATH" ]; then
-        if ! grep -q "$FISH_PATH" /etc/shells; then
-            echo "$FISH_PATH" | sudo tee -a /etc/shells
-        fi
-        chsh -s "$FISH_PATH"
-    fi
 
     # set up direnv
     [[ -e $HOME/.direnvrc ]] && mv $HOME/.direnvrc $HOME/.direnvrc.bak
@@ -104,7 +158,9 @@ function config {
     ln -sf $SHEZHI_DIR/gitconfig $HOME/.gitconfig
 
     # set up pyenv
-    mkdir -p $HOME/.pyenv
+    if [ ! -d "$HOME/.pyenv" ]; then
+        mkdir -p $HOME/.pyenv
+    fi
     export PYENV_ROOT="$HOME/.pyenv"
     export PATH="$PYENV_ROOT/bin:$PATH"
     eval "$(pyenv init -)"
