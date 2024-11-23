@@ -132,6 +132,10 @@ export TERM=xterm-256color
 export PATH="${HOME}/bin:$PATH"
 eval "$(direnv hook bash)"
 
+export PYENV_ROOT="$HOME/.pyenv"
+command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"
+eval "$(pyenv init -)"
+
 # eval "$(pyenv init -)"
 # eval "$(pyenv virtualenv-init -)"
 # export KUBECONFIG=$(ls -a ~/.kube/*.conf | paste -sd ":" -)
