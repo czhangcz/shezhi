@@ -18,12 +18,25 @@ fi
 
 SHEZHI_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
+function show_usage {
+    echo "Usage: shezhi.sh [OPTIONS]"
+    echo "Set up development environment with chosen shell and tools"
+    echo ""
+    echo "Options:"
+    echo "  --shell SHELL   Choose shell to install (fish or zsh, default: fish)"
+    echo "  --help          Show this help message and exit"
+    exit 0
+}
+
 SHELL_CHOICE="fish"  # Default shell choice
 while [[ $# -gt 0 ]]; do
     case $1 in
         --shell)
             SHELL_CHOICE="$2"
             shift 2
+            ;;
+        --help)
+            show_usage
             ;;
         *)
             shift
@@ -40,6 +53,7 @@ function install_ubuntu_pkgs {
     sudo apt update
     sudo apt-get install -y git direnv bash-completion tmux powerline curl neovim
     # Install shell of choice
+    echo "Installing $SHELL_CHOICE" 
     if [ "$SHELL_CHOICE" = "fish" ]; then
         sudo apt-get install -y fish
     else
@@ -83,6 +97,7 @@ function install_pkgs_in_common {
         curl -sS https://starship.rs/install.sh | sh -s -- -y
     fi
 
+    [[ -e $HOME/.tmux ]] && mv $HOME/.tmux $HOME/.tmux.bak
     mkdir -p ~/.tmux/plugins
     git clone --depth 1 --branch v3.1.0 https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
 }
@@ -141,8 +156,6 @@ function config {
     # set up tmux
     [[ -e $HOME/.tmux.conf ]] && mv $HOME/.tmux.conf $HOME/.tmux.conf.bak
     ln -sf $SHEZHI_DIR/tmux.conf $HOME/.tmux.conf
-    [[ -e $HOME/.tmux ]] && mv $HOME/.tmux $HOME/.tmux.bak
-    ln -sf $SHEZHI_DIR/tmux $HOME/.tmux
 
     # set up direnv
     [[ -e $HOME/.direnvrc ]] && mv $HOME/.direnvrc $HOME/.direnvrc.bak
@@ -174,6 +187,28 @@ else
     echo "unsported system"
     exit 1
 fi
+
+function show_help {
+    echo "Shezhi - Development Environment Setup Tool"
+    echo ""
+    echo "This script helps you set up a development environment on Ubuntu or macOS systems."
+    echo "It installs and configures:"
+    echo "  - Shell (fish or zsh)"
+    echo "  - Git with configuration"
+    echo "  - Tmux with plugins"
+    echo "  - Pyenv for Python version management"
+    echo "  - Direnv for environment management"
+    echo "  - Starship prompt"
+    echo "  - Rust via rustup"
+    echo "  - Neovim editor"
+    echo ""
+    echo "The script will create backup files for any existing configurations"
+    echo "before creating symbolic links to the new configuration files."
+    echo ""
+    echo "To activate tmux plugins, press prefix + I in a tmux session."
+}
+
 install_pkgs_in_common
 config
 # set_up_sudo
+show_help
