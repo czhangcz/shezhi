@@ -51,7 +51,7 @@ fi
 
 function install_ubuntu_pkgs {
     sudo apt update
-    sudo apt-get install -y git direnv bash-completion tmux powerline curl neovim
+    sudo apt-get install -y git direnv bash-completion tmux curl neovim
     # Install shell of choice
     echo "Installing $SHELL_CHOICE" 
     if [ "$SHELL_CHOICE" = "fish" ]; then
@@ -97,6 +97,10 @@ function install_pkgs_in_common {
         curl -sS https://starship.rs/install.sh | sh -s -- -y
     fi
 
+    # install uv
+    curl -LsSf https://astral.sh/uv/install.sh | sh
+
+    # install tmux plugins
     [[ -e $HOME/.tmux ]] && mv $HOME/.tmux $HOME/.tmux.bak
     mkdir -p ~/.tmux/plugins
     git clone --depth 1 --branch v3.1.0 https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm

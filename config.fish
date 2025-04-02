@@ -14,5 +14,9 @@ if status is-interactive
     pyenv init - | source
     pyenv virtualenv-init - | source 
 
-    set -gx EDITOR vim  
+    set -gx EDITOR vim
+
+    # Add paths to PATH
+    fish_add_path $HOME/.local/bin $HOME/.cargo/bin $HOME/local/bin
+
 end

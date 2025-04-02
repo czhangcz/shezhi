@@ -129,7 +129,7 @@ fi
 export TERM=xterm-256color
 
 # Set up pyenv
-export PATH="${HOME}/bin:$PATH"
+export PATH="${HOME}/bin:$HOME/.local/bin:$HOME/.cargo/bin:$HOME/local/bin:$PATH"
 eval "$(direnv hook bash)"
 
 export PYENV_ROOT="$HOME/.pyenv"
