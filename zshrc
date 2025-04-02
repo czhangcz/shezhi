@@ -53,6 +53,9 @@ export PYENV_ROOT="$HOME/.pyenv"
 command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"
 eval "$(pyenv init -)"
 
+# Set up paths
+export PATH="$HOME/.local/bin:$HOME/.cargo/bin:$HOME/local/bin:$PATH"
+
 # Initialize starship prompt if installed
 if command -v starship &> /dev/null; then
     eval "$(starship init zsh)"

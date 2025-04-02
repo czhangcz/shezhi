@@ -8,6 +8,11 @@ A collection of personal Linux configurations
 * direnv
 * pyenv
 
+# Apps to confingure
+* fish or zsh
+* git
+* tmux
+
 # Roadmap
 
-[ ] Create a start-up script 
+[x] Create a start-up script

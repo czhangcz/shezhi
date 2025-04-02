@@ -129,7 +129,7 @@ fi
 export TERM=xterm-256color
 
 # Set up pyenv
-export PATH="${HOME}/bin:$PATH"
+export PATH="${HOME}/bin:$HOME/.local/bin:$HOME/.cargo/bin:$HOME/local/bin:$PATH"
 eval "$(direnv hook bash)"
 
 export PYENV_ROOT="$HOME/.pyenv"
@@ -148,3 +148,8 @@ eval "$(pyenv init -)"
 
 ## General environment variables
 # complete -C /home/chongzha/local/bin/terraform_0.12.6 terraform_0.12.6
+
+. "$HOME/.atuin/bin/env"
+
+[[ -f ~/.bash-preexec.sh ]] && source ~/.bash-preexec.sh
+eval "$(atuin init bash)"
