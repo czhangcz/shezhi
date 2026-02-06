@@ -173,6 +173,11 @@ function config {
     # set up git
     [[ -e $HOME/.gitconfig ]] && mv $HOME/.gitconfig $HOME/.gitconfig.bak
     ln -sf $SHEZHI_DIR/gitconfig $HOME/.gitconfig
+    git config --global alias.oneline "log --pretty=oneline"
+
+    # set up gwt (git worktree helper)
+    mkdir -p $HOME/.local/bin
+    ln -sf $SHEZHI_DIR/gwt $HOME/.local/bin/gwt
 
     # set up pyenv
     if [ ! -d "$HOME/.pyenv" ]; then

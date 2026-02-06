@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+usage() {
+    echo "Usage: gwt <directory> <branch> [claude_md_file]"
+    echo ""
+    echo "Create a git worktree at <directory> for <branch>."
+    echo "If <claude_md_file> is provided, symlink it as CLAUDE.local.md in the worktree."
+    exit 1
+}
+
+if [[ $# -lt 2 ]]; then
+    usage
+fi
+
+worktree_dir="$1"
+branch="$2"
+claude_md="${3:-}"
+
+git worktree add "$worktree_dir" "$branch"
+
+if [[ -n "$claude_md" ]]; then
+    # Resolve to absolute path for the symlink
+    claude_md_abs="$(cd "$(dirname "$claude_md")" && pwd)/$(basename "$claude_md")"
+    ln -s "$claude_md_abs" "$worktree_dir/CLAUDE.local.md"
+    echo "Linked $claude_md_abs -> $worktree_dir/CLAUDE.local.md"
+fi

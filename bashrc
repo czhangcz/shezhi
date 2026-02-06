@@ -148,3 +148,8 @@ eval "$(pyenv init -)"
 
 ## General environment variables
 # complete -C /home/chongzha/local/bin/terraform_0.12.6 terraform_0.12.6
+
+. "$HOME/.atuin/bin/env"
+
+[[ -f ~/.bash-preexec.sh ]] && source ~/.bash-preexec.sh
+eval "$(atuin init bash)"
